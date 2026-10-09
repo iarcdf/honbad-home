@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Honbad — Desktop API Client</title>
+<link rel="icon" type="image/ico" href="./assets/honbad.png">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin:0; min-height:100%; background:#090b0d; }
+  body {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color:#f7f7f7; overflow-x:hidden;
+  }
+  :root {
+    --orange:#ff641e; --orange2:#ff9d16; --muted:#b7b9bd;
+    --line:rgba(255,255,255,.10); --panel:rgba(255,255,255,.035);
+  }
+  .page {
+    min-height:100vh;
+    position:relative;
+    overflow:hidden;
+    background-image:url("assets/honbad.png");
+    background-size:cover;
+    background-position:center center;
+    background-repeat:no-repeat;
+    display:grid;
+    grid-template-rows:auto 1fr auto;
+  }
+  .page::before {
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:0;
+    background:
+      linear-gradient(90deg,
+        rgba(8,10,12,.94) 0%,
+        rgba(9,11,13,.91) 18%,
+        rgba(10,11,13,.82) 36%,
+        rgba(13,12,12,.62) 54%,
+        rgba(17,12,10,.34) 72%,
+        rgba(20,12,8,.13) 100%),
+      linear-gradient(180deg,
+        rgba(8,10,12,.34) 0%,
+        rgba(8,10,12,.08) 45%,
+        rgba(8,10,12,.25) 100%);
+  }
+  header, main, footer { position:relative; z-index:2; }
+  header {
+    height:112px; display:flex; align-items:center; justify-content:space-between;
+    padding:0 clamp(28px,4.4vw,72px);
+  }
+  .brand { display:flex; align-items:center; gap:18px; font-size:30px; font-weight:700; letter-spacing:-.7px; }
+  .brand img { width:68px; height:68px; border-radius:17px; object-fit:cover; }
+  .auth { display:flex; gap:16px; }
+  button, .download {
+    border:1px solid rgba(255,255,255,.22); color:#fff; background:rgba(255,255,255,.025);
+    border-radius:12px; padding:14px 27px; font:inherit; font-weight:700; cursor:pointer;
+    transition:background-color .18s ease, border-color .18s ease, box-shadow .18s ease, color .18s ease; text-decoration:none;
+  }
+  button:hover,.download:hover {
+    border-color:rgba(255,124,55,.58);
+    background:rgba(255,105,35,.09);
+    box-shadow:0 0 0 1px rgba(255,105,35,.06), 0 0 22px rgba(255,92,25,.08);
+  }
+  .signup:hover,.download.primary:hover {
+    background:#ff7335;
+    border-color:#ff8248;
+    box-shadow:0 0 24px rgba(255,94,25,.18);
+  }
+  .signup { background:var(--orange); border-color:var(--orange); }
+  main {
+    display:grid; grid-template-columns:minmax(500px,.95fr) minmax(430px,1.05fr);
+    align-items:center; gap:20px; padding:20px clamp(28px,4.4vw,72px) 30px;
+    max-width:1600px; width:100%; margin:auto;
+  }
+  .copy { max-width:720px; }
+  .eyebrow { color:#ffb23a; letter-spacing:.28em; font-size:14px; font-weight:700; margin-bottom:20px; }
+  h1 { font-size:clamp(58px,6.4vw,102px); line-height:.96; letter-spacing:-.055em; margin:0; max-width:720px; }
+  h1 span { color:var(--orange); display:block; }
+  .lead { color:#c6c7ca; font-size:clamp(18px,1.6vw,25px); line-height:1.5; max-width:700px; margin:26px 0 28px; }
+  .features { display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-bottom:30px; max-width:690px; }
+  .feature { display:grid; grid-template-columns:58px 1fr; gap:15px; align-items:start; }
+  .feature-icon {
+    width:58px; height:58px; border:1px solid rgba(255,100,30,.35); border-radius:14px;
+    display:grid; place-items:center; background:rgba(255,100,30,.08); color:var(--orange);
+    font-size:27px; font-weight:800;
+  }
+  .feature h2 { font-size:21px; margin:4px 0 6px; }
+  .feature p { margin:0; color:#b7b9bd; line-height:1.45; font-size:16px; }
+  .downloads { display:flex; gap:12px; flex-wrap:wrap; }
+  .download { min-width:174px; display:flex; gap:12px; align-items:center; padding:13px 18px; }
+  .download.primary { background:linear-gradient(135deg,#ff7628,#ff5719); border-color:transparent; }
+  .platform-icon { width:28px; height:28px; flex:0 0 28px; color:#fff; } .platform-icon.tux { width:30px; height:30px; }
+  .dltext { line-height:1.05; }
+  .dltext small { display:block; font-size:11px; font-weight:500; opacity:.82; margin-top:4px; }
+  .art {
+    min-height:520px;
+    pointer-events:none;
+  }
+  .art img {
+    display:none;
+  }
+  @keyframes float { 0%,100%{transform:scale(.88) translateY(0)} 50%{transform:scale(.88) translateY(-9px)} }
+  footer {
+    min-height:70px; border-top:1px solid var(--line); display:flex; align-items:center;
+    justify-content:space-between; padding:0 clamp(28px,4.4vw,72px); color:#a5a7ab; font-size:13px;
+    background:rgba(8,10,12,.34); backdrop-filter:blur(8px);
+  }
+  .footer-brand { display:flex; align-items:center; gap:10px; }
+  .footer-brand img { width:32px; height:32px; border-radius:8px; }
+  .footer-brand strong { color:#fff; }
+  .footer-links { display:flex; gap:30px; }
+  .footer-links a { color:#aaa; text-decoration:none; }
+  .footer-links a:hover { color:#fff; }
+
+  /* Gradient button states cross-fade using a pseudo-element for smooth transitions. */
+  button, .download {position:relative;isolation:isolate;overflow:hidden;
+    background:linear-gradient(125deg,rgba(255,255,255,.08),rgba(255,110,36,.08));
+    transition:border-color .5s ease,box-shadow .55s ease,color .4s ease;}
+  button::before,.download::before {content:"";position:absolute;inset:0;z-index:-1;
+    background:linear-gradient(125deg,rgba(255,255,255,.12),rgba(255,111,35,.20));
+    opacity:0;transition:opacity .55s cubic-bezier(.22,.61,.36,1);}
+  button:hover::before,.download:hover::before {opacity:1;}
+  button:hover,.download:hover {border-color:rgba(255,145,80,.5);
+    box-shadow:0 0 24px rgba(255,93,26,.11);}
+  .signup,.download.primary {background:linear-gradient(120deg,#ff883e 0%,#ff6725 50%,#e94c15 100%);
+    border-color:#ff7134;}
+  .signup::before,.download.primary::before {background:linear-gradient(120deg,#ffa45b,#ff7b34 50%,#f55c21);}
+  .signup:hover,.download.primary:hover {background:linear-gradient(120deg,#ff883e 0%,#ff6725 50%,#e94c15 100%);}
+  button:focus-visible,.download:focus-visible {outline:2px solid #ffa35c;outline-offset:3px;}
+  @media(min-width:1600px) {
+    main {max-width:1740px;} .copy {max-width:780px;}
+  }
+  @media(max-width:1450px) {
+    header {height:88px;}
+    main {grid-template-columns:minmax(0,1fr) minmax(0,.8fr);gap:12px;}
+    h1 {font-size:clamp(55px,6vw,84px);}
+    .lead {font-size:18px;margin:19px 0 23px;}
+    .feature h2 {font-size:19px;}
+    .feature p {font-size:14px;}
+    .download {min-width:145px;padding:12px 14px;}
+  }
+  @media(max-width:1150px) {
+    main {grid-template-columns:minmax(0,1fr) minmax(0,.3fr);}
+    .page {background-position:60% center;}
+    .features {grid-template-columns:1fr;gap:15px;}
+    .feature {max-width:540px;}
+  }
+  @media(max-width:850px) {
+    .page {min-height:100svh;background-position:66% center;}
+    .page::before {background:linear-gradient(90deg,rgba(9,11,13,.95),rgba(9,11,13,.86) 52%,rgba(14,11,10,.48));}
+    header {height:78px;padding-inline:24px;}
+    .brand {font-size:25px;} .brand img {width:48px;height:48px;}
+    main {display:block;padding:35px 24px 40px;}
+    .copy {max-width:660px;} .art {display:none;}
+    .features {grid-template-columns:1fr 1fr;gap:17px;}
+    h1 {font-size:clamp(55px,10vw,78px);}
+    footer {padding:15px 24px;gap:15px;}
+  }
+  @media(max-width:600px) {
+    .page {background-position:68% center;}
+    .page::before {background:linear-gradient(90deg,rgba(9,11,13,.96),rgba(9,11,13,.91) 52%,rgba(14,11,10,.68));}
+    header {height:72px;padding-inline:16px;}
+    .brand {font-size:21px;gap:9px;} .brand img {width:40px;height:40px;border-radius:10px;}
+    .auth {gap:7px;} .auth button {padding:10px 12px;font-size:13px;}
+    main {padding:28px 18px 35px;}
+    .eyebrow {font-size:11px;margin-bottom:14px;}
+    h1 {font-size:clamp(45px,13vw,64px);}
+    .lead {font-size:17px;line-height:1.45;}
+    .features {grid-template-columns:1fr;gap:19px;}
+    .feature {grid-template-columns:48px 1fr;gap:12px;}
+    .feature-icon {width:48px;height:48px;}
+    .downloads {display:grid;grid-template-columns:1fr;gap:10px;}
+    .download {width:100%;min-width:0;}
+    footer {flex-direction:column;align-items:flex-start;padding:16px 18px;gap:13px;}
+    .footer-links {gap:22px;}
+  }
+  @media(max-width:365px) {
+    .brand span {display:none;} .auth button {padding:9px 10px;}
+    h1 {font-size:44px;}
+  }
+  @media(min-width:851px) and (max-height:800px) {
+    header {height:72px;} main {padding-block:5px;}
+    .eyebrow {margin-bottom:10px;}
+    h1 {font-size:clamp(53px,5.5vw,75px);}
+    .lead {margin:13px 0 17px;font-size:17px;}
+    .features {margin-bottom:18px;}
+    footer {min-height:50px;}
+  }
+  @media(prefers-reduced-motion:reduce) {
+    *,*::before,*::after {animation:none!important;transition:none!important;}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="brand">
+      <img src="assets/honbad.png" alt="Honbad logo">
+      <span>Honbad</span>
+    </div>
+    <div class="auth">
+      <button type="button">Sign in</button>
+      <button type="button" class="signup">Sign up</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="copy">
+      <div class="eyebrow">THE DESKTOP API CLIENT</div>
+      <h1>Test APIs.<span>Together.</span></h1>
+      <p class="lead">A fast, intuitive desktop application for developers who value simplicity and collaboration.</p>
+
+      <div class="features">
+        <article class="feature">
+          <div class="feature-icon">↯</div>
+          <div><h2>Easy to use</h2><p>A clean and intuitive interface so you can start testing APIs in seconds.</p></div>
+        </article>
+        <article class="feature">
+          <div class="feature-icon">◎</div>
+          <div><h2>Collaborate</h2><p>Work together with collections, environments and reusable requests.</p></div>
+        </article>
+      </div>
+
+      <div class="downloads">
+        <a href="" class="download primary" href="#" aria-label="Download Honbad for Windows"><svg class="platform-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M2.5 4.2 10.7 3v8H2.5V4.2Zm9.3-1.35L21.5 1.5V11h-9.7V2.85ZM2.5 12h8.2v8L2.5 18.85V12Zm9.3 0h9.7v9.5l-9.7-1.35V12Z"/></svg><span class="dltext">Download<small>for Windows</small></span></a>
+        <a class="download" href="#" aria-label="Download Honbad for macOS"><svg class="platform-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M17.05 12.54c-.03-3.05 2.49-4.52 2.6-4.59a5.55 5.55 0 0 0-4.36-2.36c-1.84-.19-3.63 1.1-4.57 1.1-.96 0-2.4-1.08-3.96-1.05a5.79 5.79 0 0 0-4.87 2.97c-2.12 3.67-.54 9.07 1.49 12.03 1.02 1.45 2.2 3.08 3.76 3.02 1.52-.06 2.09-.97 3.93-.97 1.82 0 2.36.97 3.95.93 1.64-.02 2.68-1.46 3.66-2.93a12.03 12.03 0 0 0 1.67-3.4 5.25 5.25 0 0 1-3.3-4.75ZM14.08 3.64A5.32 5.32 0 0 0 15.3 0a5.43 5.43 0 0 0-3.5 1.73 5.06 5.06 0 0 0-1.25 3.5 4.49 4.49 0 0 0 3.53-1.59Z"/></svg><span class="dltext">Download<small>for macOS</small></span></a>
+        <a class="download" href="#" aria-label="Download Honbad for Linux"><svg class="platform-icon tux" viewBox="0 0 64 64" aria-hidden="true"><g fill="currentColor"><ellipse cx="32" cy="35" rx="18" ry="23"/><circle cx="25" cy="17" r="7"/><circle cx="39" cy="17" r="7"/></g><g fill="#090b0d"><circle cx="27" cy="17" r="2.2"/><circle cx="37" cy="17" r="2.2"/><ellipse cx="32" cy="42" rx="10" ry="13"/></g><path fill="#fff" d="M25 24c2-3 12-3 14 0l-7 6-7-6Zm-1 15c2-7 14-7 16 0 1 8-2 14-8 14s-9-6-8-14Z"/><path fill="#f6b73c" d="m27 25 5 5 5-5-5-3-5 3ZM16 56l10-4 3 5-13 2v-3Zm32 0-10-4-3 5 13 2v-3Z"/></svg><span class="dltext">Download<small>for Linux</small></span></a>
+      </div>
+    </section>
+
+    <div class="art" aria-hidden="true">
+      <img src="assets/honbad.png" alt="">
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-brand">
+      <img src="assets/honbad.png" alt="">
+      <strong>Honbad</strong>
+      <span>© 2026 Honbad. All rights reserved.</span>
+    </div>
+    <nav class="footer-links" aria-label="Footer">
+      <a href="#">Privacy</a><a href="#">Terms</a><a href="#">Contact</a>
+    </nav>
+  </footer>
+</div>
+</body>
+</html>
